@@ -1,0 +1,85 @@
+name: feature-development
+version: 1
+
+state_schema:
+  ticket_id: str
+  spec: str
+  diff: str
+  review_feedback: str
+  review_approved: bool
+  tests_passed: bool
+  human_approved: bool
+  revision_count: int
+
+nodes:
+  - id: plan
+    type: agent
+    role: planner
+    outputs: [spec]
+
+  - id: code
+    type: agent
+    role: coder
+    inputs: [spec]
+    outputs: [diff]
+    tools: [cursor_automation, repo_read, repo_write]
+
+  - id: review
+    type: agent
+    role: reviewer
+    inputs: [diff]
+    outputs: [review_feedback, review_approved]
+
+  - id: test
+    type: function
+    handler: run_test_suite
+    inputs: [diff]
+    outputs: [tests_passed]
+
+  - id: revise
+    type: agent
+    role: coder
+    inputs: [diff, review_feedback]
+    outputs: [diff]
+
+  - id: human_approval
+    type: human
+    context_fields: [diff, review_feedback, tests_passed]
+    allowed_actions: [approve, reject]
+
+  - id: merge
+    type: function
+    handler: create_pull_request
+    inputs: [diff]
+
+edges:
+  - from: START
+    to: plan
+  - from: plan
+    to: code
+  - from: code
+    to: review
+  - from: review
+    to: test
+
+routes:
+  - from: test
+    condition: route_after_test
+    targets:
+      revise: revise
+      human_approval: human_approval
+
+  - from: revise
+    to: review
+
+  - from: human_approval
+    condition: route_after_human
+    targets:
+      merge: merge
+      revise: revise
+
+  - from: merge
+    to: END
+
+limits:
+  revision_count_max: 3

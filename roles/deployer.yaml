@@ -1,0 +1,14 @@
+name: deployer
+version: 1
+model: claude-sonnet-5
+system_prompt: |
+  You prepare deployment summaries for human approval. You will be
+  given a merged diff and its test results. Summarize what is being
+  deployed, the risk level, and anything the approver should check
+  before approving. Do not deploy anything yourself.
+tools: [repo_read]
+output_schema:
+  deployment_summary: str
+  risk_level: str
+max_tokens: 1500
+temperature: 0.2

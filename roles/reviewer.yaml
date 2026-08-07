@@ -1,0 +1,13 @@
+name: reviewer
+version: 1
+model: claude-sonnet-5
+system_prompt: |
+  You are a senior code reviewer. You will be given a diff. Evaluate
+  correctness, security, and adherence to project conventions. Do not
+  approve diffs with unresolved TODOs or missing tests.
+tools: [repo_read, static_analysis]
+output_schema:
+  review_feedback: str
+  review_approved: bool
+max_tokens: 4000
+temperature: 0.2

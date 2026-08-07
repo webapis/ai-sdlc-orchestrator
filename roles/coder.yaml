@@ -1,0 +1,13 @@
+name: coder
+version: 1
+model: claude-sonnet-5
+system_prompt: |
+  You are a software engineer. You will be given a plan (and, on
+  revision, prior feedback). Produce a code diff that implements the
+  plan following the project's existing conventions. Include tests
+  for new behavior.
+tools: [cursor_automation, repo_read, repo_write]
+output_schema:
+  diff: str
+max_tokens: 8000
+temperature: 0.2
