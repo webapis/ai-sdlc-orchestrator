@@ -7,6 +7,33 @@ workflow graph — rather than a single unstructured chat session.
 Status: **design phase**. See `docs/` for the vision and full developer
 manual before writing code.
 
+## Why this project
+
+- **One graph, every project.** A workflow is defined once and reused
+  across every registered project — onboard the 10th project for almost
+  nothing, instead of re-explaining your dev process to an AI each time.
+- **Nothing ships without a human looking at it.** Every run pauses at a
+  human-approval gate before merge/deploy, with full state checkpointed.
+  AI-speed iteration on coding/review/test — but a person is always the
+  last gate before production.
+- **A full audit trail, for free.** Every node execution, routing
+  decision, retry, and human decision is written to `run_events`. If
+  something ships broken, you have a literal timeline instead of guesswork.
+- **Failures are handled by category, not by panic.** Rate limits,
+  invalid input, and policy violations are each handled differently — no
+  infinite retry loops, no silent failures on things that needed a human.
+- **Change one piece without breaking the rest.** Prompts (`roles/`),
+  workflow shape (`workflows/`), and routing logic (Python) are separate
+  layers — edit one without risking the others.
+- **Scales down as well as up.** A single developer using Claude Code
+  subagents is already doing this pattern at a small scale. This project
+  is what it looks like when that needs to run unattended, across many
+  projects, with accountability — adopt it incrementally.
+- **Good engineering discipline, not just AI plumbing.** Idempotency on
+  side-effecting nodes, tenant isolation at the query layer, least-
+  privilege tool access per role — useful practice regardless of the AI
+  framing.
+
 ## Start here
 
 1. Read [`docs/vision.md`](docs/vision.md) — why this exists, the graph
