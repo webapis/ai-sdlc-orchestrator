@@ -115,7 +115,9 @@ Orchestration Engine
 ├── RetryPolicyEngine    — classifies failures and applies retry/escalation rules
 └── ExecutionTracer      — emits structured events for observability
 ```
+## 2.4 Internal Process Diagram
 
+![Orchestrator internal process](../architecture/orchestrator-internal-process.svg)
 ### 2.4 Request Flow (typical run)
 
 1. A trigger (webhook, manual API call, schedule) creates a **WorkflowRun** for a registered **Project**.

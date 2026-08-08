@@ -34,15 +34,25 @@ manual before writing code.
   privilege tool access per role — useful practice regardless of the AI
   framing.
 
+## Use cases
+
+Three short stories showing what a run actually looks like — a Friday
+feature request that gets approved from a phone, a flaky dependency that
+escalates itself only when a human is truly needed, and one agency
+reusing a single workflow across a dozen client projects.
+
+Read the full stories in [`docs/use-cases.md`](docs/use-cases.md).
+
 ## Start here
 
 1. Read [`docs/vision.md`](docs/vision.md) — why this exists, the graph
    engineering concepts it's built on, and the tool landscape it draws from.
 2. Read [`docs/architecture.md`](docs/architecture.md) — the complete
    developer manual: system architecture, data model, workflow spec format,
-   engine internals, security, deployment, and the phased roadmap.
-3. Check the [Roadmap](docs/architecture.md#19-roadmap) for current phase
-   and open items before starting work.
+   engine internals, security, and deployment.
+3. Read [`docs/implementation-plan.md`](docs/implementation-plan.md) —
+   the phased build order, exit criteria per phase, and what "v1 done"
+   means. Check current phase and open items before starting work.
 
 ## Repository layout
 
