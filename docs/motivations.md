@@ -78,6 +78,10 @@ This document is the complete list of reasons the AI SDLC Orchestrator exists, i
 37. Support plugging in new tools (testing frameworks, linters, deployment targets) without changing the core engine
 38. Make it possible to swap or upgrade individual pipeline stages independently, without redesigning the whole pipeline
 
+## Task execution discipline & scheduling
+
+43. The project performs predefined tasks and sticks to the plan — it knows what to do, why to do it, when to do it, for how long, how many times, and how frequently
+
 ---
 
 ## Note on current design status
@@ -96,3 +100,4 @@ These gaps are noted here rather than fixed yet — see the open discussion in p
 | Date | Change |
 |---|---|
 | 2026-08-08 | Initial motivations list — 42 items across 7 themes |
+| 2026-08-08 | Added #43 (task execution discipline & scheduling) — new theme |
