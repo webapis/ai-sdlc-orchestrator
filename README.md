@@ -45,12 +45,14 @@ Read the full stories in [`docs/use-cases.md`](docs/use-cases.md).
 
 ## Start here
 
-1. Read [`docs/vision.md`](docs/vision.md) — why this exists, the graph
+1. Read [`docs/motivations.md`](docs/motivations.md) — the full list of
+   reasons this project exists, grouped by theme.
+2. Read [`docs/vision.md`](docs/vision.md) — why this exists, the graph
    engineering concepts it's built on, and the tool landscape it draws from.
-2. Read [`docs/architecture.md`](docs/architecture.md) — the complete
+3. Read [`docs/architecture.md`](docs/architecture.md) — the complete
    developer manual: system architecture, data model, workflow spec format,
    engine internals, security, and deployment.
-3. Read [`docs/implementation-plan.md`](docs/implementation-plan.md) —
+4. Read [`docs/implementation-plan.md`](docs/implementation-plan.md) —
    the phased build order, exit criteria per phase, and what "v1 done"
    means. Check current phase and open items before starting work.
 
