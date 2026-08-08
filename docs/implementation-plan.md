@@ -25,10 +25,11 @@ To avoid the trap of building the whole platform before proving the core idea wo
 | GitHub only | Azure DevOps adapter |
 | Single-tenant, single-project | Multi-tenant isolation, credential scoping at scale |
 | Postgres-backed checkpointing | High-availability / multi-region |
-| CLI + REST API | Web UI for approvals and run inspection |
-| Manual role/workflow YAML authoring | AI-assisted workflow generation |
+| CLI + REST API (primary interface) | AI-assisted workflow generation |
+| Manual role/workflow YAML authoring | Full project-management Web UI (registration, workflow/role authoring, credentials) |
+| **Minimal Web UI — run inspection + approval only** | |
 
-Multi-tenant, Azure DevOps, and the Web UI are real requirements — they're sequenced into Phase 4+ once the core loop is proven end-to-end on one project.
+Multi-tenant, Azure DevOps, and the full project-management UI are real requirements — they're sequenced into Phase 9+ once the core loop is proven end-to-end on one project. The minimal Web UI is scoped narrowly on purpose: it exists only because "approve from your phone" (see `docs/use-cases.md`, Story 1) is a real capability the CLI can't match — not as a first step toward a full dashboard. Project registration, credentials, and workflow authoring stay CLI/API-only in v1.
 
 ---
 
@@ -43,11 +44,12 @@ Multi-tenant, Azure DevOps, and the Web UI are real requirements — they're seq
 | 4 | GitHub integration | 2 weeks | A run opens a real PR on a real (test) repo after approval |
 | 5 | Retry & escalation | 1–2 weeks | Fault injection tests prove each failure category routes correctly |
 | 6 | Backend & API | 2–3 weeks | External trigger via webhook → full run → PR, no manual engine invocation |
-| 7 | Observability | 1 week | Full run trace reconstructable from `run_events` alone |
-| 8 | Hardening & multi-project | 2–3 weeks | Two projects run concurrently without state leakage |
-| 9 | Multi-tenant + Azure DevOps | Ongoing | Deferred — scoped only after v1 is proven |
+| 7 | Minimal Web UI (inspect + approve) | 1–2 weeks | Approve a run from a browser; no CLI/curl involved |
+| 8 | Observability | 1 week | Full run trace reconstructable from `run_events` alone |
+| 9 | Hardening & multi-project | 2–3 weeks | Two projects run concurrently without state leakage |
+| 10 | Multi-tenant + Azure DevOps + full project-management UI | Ongoing | Deferred — scoped only after v1 is proven |
 
-Estimated time to a usable v1 (Phases 0–7): **~12–16 weeks** at a steady, part-time-to-moderate pace. Treat these as relative sizing, not commitments — the point is sequencing and exit criteria, not the calendar.
+Estimated time to a usable v1 (Phases 0–8): **~13–18 weeks** at a steady, part-time-to-moderate pace. Treat these as relative sizing, not commitments — the point is sequencing and exit criteria, not the calendar.
 
 ---
 
@@ -153,49 +155,65 @@ Estimated time to a usable v1 (Phases 0–7): **~12–16 weeks** at a steady, pa
 | 6.1 | Implement `POST /api/v1/projects` (register), `POST /api/v1/workflows` | A project + workflow can be registered via HTTP |
 | 6.2 | Implement `POST /api/v1/projects/{id}/runs` → internal call to the engine | Triggers a real run, returns a `run_id` |
 | 6.3 | Implement `GET /api/v1/runs/{id}`, `/events`, `/approval` | Run status and audit trail visible via API |
-| 6.4 | Implement `POST /api/v1/runs/{id}/approval` | Replaces the Phase 3 CLI approval path |
+| 6.4 | Implement `POST /api/v1/runs/{id}/approval` | Replaces the Phase 3 CLI approval path against the engine directly — CLI now calls this endpoint instead |
 | 6.5 | Implement `POST /api/v1/webhooks/github` | A real GitHub push/PR event triggers a run automatically |
 
-**Exit demo:** push a commit to the test repo; with no manual trigger, a run starts, executes, pauses, and you approve it through the API (or a simple `curl`) rather than the engine CLI.
+**Exit demo:** push a commit to the test repo; with no manual trigger, a run starts, executes, pauses, and you approve it through the CLI (now backed by the real API) rather than talking to the engine directly.
 
 ---
 
-### Phase 7 — Observability
+### Phase 7 — Minimal Web UI (inspect + approve only)
+**Goal:** deliver the one capability the CLI genuinely can't — approving a run from a phone or any browser, per `docs/use-cases.md` Story 1. Scope stays deliberately narrow: no registration, no workflow/role authoring, no credential management here — those stay CLI/API-only.
+
+| # | Task | Done when |
+|---|---|---|
+| 7.1 | Read-only run list + detail view, backed by `GET /api/v1/runs` and `/events` | A run's status and event trace are visible in a browser |
+| 7.2 | Approval action wired to `POST /api/v1/runs/{id}/approval` | Approve/reject from the browser resumes a paused run |
+| 7.3 | Mobile-usable layout (not full native app — a responsive web view is enough) | Approving from a phone browser works end-to-end |
+| 7.4 | Auth reuses the same tenant-scoped bearer token from §12 — no separate login system | No new authentication mechanism introduced just for the UI |
+
+**Exit demo:** trigger a run from the CLI, let it pause for approval, then approve it entirely from a phone's browser — no CLI, no `curl`.
+
+**Explicitly out of scope for this phase:** project registration, workflow/role YAML editing, credential entry. If a task needs those, it stays a CLI/API task in v1.
+
+---
+
+### Phase 8 — Observability
 **Goal:** every run is fully explainable after the fact, without reading raw LLM transcripts.
 
 | # | Task | Done when |
 |---|---|---|
-| 7.1 | Emit `node_start` / `node_complete` events with latency | Present in `run_events` for every node |
-| 7.2 | Emit `route_selected` events (which conditional edge fired and why) | Present for every conditional edge traversal |
-| 7.3 | Emit `retry` / `escalation` / `human_decision` events | Present for every occurrence in Phase 3/5 tests |
-| 7.4 | Build a simple trace-reconstruction script/query (`GET /runs/{id}/events` ordered) | A full run's story can be read top-to-bottom from one query |
+| 8.1 | Emit `node_start` / `node_complete` events with latency | Present in `run_events` for every node |
+| 8.2 | Emit `route_selected` events (which conditional edge fired and why) | Present for every conditional edge traversal |
+| 8.3 | Emit `retry` / `escalation` / `human_decision` events | Present for every occurrence in Phase 3/5 tests |
+| 8.4 | Build a simple trace-reconstruction script/query (`GET /runs/{id}/events` ordered) | A full run's story can be read top-to-bottom from one query |
 
 **Exit demo:** take any completed run and answer "what exactly happened and why" using only `run_events` — no logs, no re-running.
 
 ---
 
-### Phase 8 — Hardening & multi-project
+### Phase 9 — Hardening & multi-project
 **Goal:** prove the "one graph, every project" claim from the README is actually true.
 
 | # | Task | Done when |
 |---|---|---|
-| 8.1 | Register a second, different test project against the same `feature-development` workflow | Both run independently |
-| 8.2 | Concurrency test: trigger runs on both projects simultaneously | No cross-project state leakage; verified via `run_events` and `workflow_runs.project_id` |
-| 8.3 | Add advisory locking for same-project concurrent runs touching the same branch | Two concurrent runs on the same project/branch serialize correctly, don't corrupt each other |
-| 8.4 | Load/soak test: N runs over M hours without leaks, orphaned checkpoints, or stuck `waiting_human` runs | Clean run after soak period |
+| 9.1 | Register a second, different test project against the same `feature-development` workflow | Both run independently |
+| 9.2 | Concurrency test: trigger runs on both projects simultaneously | No cross-project state leakage; verified via `run_events` and `workflow_runs.project_id` |
+| 9.3 | Add advisory locking for same-project concurrent runs touching the same branch | Two concurrent runs on the same project/branch serialize correctly, don't corrupt each other |
+| 9.4 | Load/soak test: N runs over M hours without leaks, orphaned checkpoints, or stuck `waiting_human` runs | Clean run after soak period |
 
 **Exit demo:** two unrelated test repos, registered as separate projects, both running the same workflow concurrently without interference.
 
 ---
 
-### Phase 9 — Multi-tenant, Azure DevOps, Web UI (post-v1)
+### Phase 10 — Multi-tenant, Azure DevOps, full project-management UI (post-v1)
 
-Only sequenced in detail once Phases 0–8 are proven. High-level shape (from `docs/architecture.md` §10, §11, §15):
+Only sequenced in detail once Phases 0–9 are proven. High-level shape (from `docs/architecture.md` §10, §11, §15):
 
 - Tenant isolation at the query layer + encrypted credential scoping
 - `AzureDevOpsAdapter` implementing the same `VcsAdapter` protocol proven in Phase 4
 - Kubernetes deployment (`orchestrator-worker` scaling on queue depth)
-- Web UI for approval gates and run inspection, replacing the CLI/`curl` workflow from Phase 6
+- Extending the Phase 7 Web UI into a full project-management surface: registration, workflow/role authoring, credential entry — everything deliberately excluded from Phase 7's narrow scope
 
 ---
 
@@ -209,12 +227,13 @@ Phase 0 (env/schema)
               │     └─▶ Phase 5 (retry/escalation — reuses interrupt mechanism)
               └─▶ Phase 4 (GitHub integration)
                     └─▶ Phase 6 (backend + API)
-                          └─▶ Phase 7 (observability)
-                                └─▶ Phase 8 (hardening + multi-project)
-                                      └─▶ Phase 9 (multi-tenant, ADO, Web UI)
+                          ├─▶ Phase 7 (minimal Web UI — inspect + approve)
+                          └─▶ Phase 8 (observability)
+                                └─▶ Phase 9 (hardening + multi-project)
+                                      └─▶ Phase 10 (multi-tenant, ADO, full Web UI)
 ```
 
-Phases 3 and 4 can run in parallel once Phase 2 is done — they touch different parts of the system (interrupt handling vs. VCS I/O). Phase 5 depends on Phase 3's interrupt mechanism, not on Phase 4.
+Phases 3 and 4 can run in parallel once Phase 2 is done — they touch different parts of the system (interrupt handling vs. VCS I/O). Phase 5 depends on Phase 3's interrupt mechanism, not on Phase 4. Phase 7 depends only on Phase 6's approval endpoint (6.4) — it can proceed in parallel with Phase 8, since neither depends on the other.
 
 ---
 
@@ -225,8 +244,9 @@ Phases 3 and 4 can run in parallel once Phase 2 is done — they touch different
 | LLM structured-output failures block graph progress | 2, 5 | Treat as expected from Phase 2 onward; build `MODEL_FORMAT_ERROR` repair path early, even ahead of full Phase 5 |
 | Checkpoint/resume bugs cause silent data loss | 3 | The kill-and-resume test (3.4) is non-negotiable — do not proceed to Phase 4 without it passing reliably, including under induced failures |
 | Idempotency gaps cause duplicate PRs or side effects on retry | 4, 5 | Idempotency key enforcement (5.4) should land before any real GitHub write path is exercised under retry conditions |
-| Scope creep toward multi-tenant/Web UI before core loop is proven | All | Scope boundaries (§2) are a hard gate — Phase 9 items are explicitly out of v1 |
-| Webhook-triggered runs firing unexpectedly on a real repo during testing | 6 | Use a disposable/sandbox GitHub repo for all integration testing until Phase 8 hardening is complete |
+| Scope creep toward multi-tenant/full Web UI before core loop is proven | All | Scope boundaries (§2) are a hard gate — Phase 10 items, and anything beyond Phase 7's narrow inspect+approve scope, are explicitly out of v1 |
+| Webhook-triggered runs firing unexpectedly on a real repo during testing | 6 | Use a disposable/sandbox GitHub repo for all integration testing until Phase 9 hardening is complete |
+| Phase 7's Web UI scope quietly grows beyond inspect + approve | 7 | Phase 7's exit demo only tests approval from a browser — any task not needed for that demo (registration, auth beyond token reuse, workflow editing) belongs in Phase 10 |
 
 ---
 
@@ -237,7 +257,7 @@ v1 is complete when all of the following are simultaneously true on a real (sand
 - [ ] A push to the repo triggers a run automatically (no manual invocation)
 - [ ] The run executes plan → code → review → test without human intervention
 - [ ] The run pauses for approval, survives an engine restart mid-pause, and resumes correctly
-- [ ] Approving via the API results in a real pull request on the repo
+- [ ] Approving via the CLI **or** the minimal Web UI results in a real pull request on the repo
 - [ ] A forced failure (e.g., revoked credential) escalates to a human with a correctly classified reason, not a crash
 - [ ] The full run is reconstructable, start to finish, from `run_events` alone
 - [ ] Two different registered projects can run the same workflow concurrently without interference
@@ -249,3 +269,4 @@ v1 is complete when all of the following are simultaneously true on a real (sand
 | Date | Change |
 |---|---|
 | 2026-08-07 | Initial implementation plan and roadmap v0.1 |
+| 2026-08-08 | CLI confirmed as permanent primary interface; added narrow-scope Web UI (Phase 7: inspect + approve only) rather than deferring Web UI entirely; renumbered Phases 7–9 to 8–10 |
