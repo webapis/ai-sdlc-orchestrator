@@ -55,6 +55,8 @@ Read the full stories in [`docs/use-cases.md`](docs/use-cases.md).
 4. Read [`docs/implementation-plan.md`](docs/implementation-plan.md) —
    the phased build order, exit criteria per phase, and what "v1 done"
    means. Check current phase and open items before starting work.
+5. Read [`docs/operations.md`](docs/operations.md) — the full inventory
+   of operations the system performs, grouped by where each happens.
 
 ## Repository layout
 
