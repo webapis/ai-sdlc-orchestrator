@@ -389,7 +389,7 @@ Route conditions (`route_after_test`, `route_after_human`, etc.) are **not** wri
 
 ### 7.1 Role File Format
 
-Each AI role used by `agent`-type nodes is defined in its own versioned file under `/roles`.
+Each AI role used by `agent`-type nodes is defined in its own versioned file under [`/roles`](../roles/).
 
 ```yaml
 # roles/reviewer.yaml
@@ -412,16 +412,16 @@ temperature: 0.2
 
 | Role | Responsibility | Typical node type |
 |---|---|---|
-| `planner` | Turns a ticket/spec into an actionable plan | `agent` |
-| `coder` | Produces or revises a code diff | `agent` (+ Cursor Automation tool) |
-| `reviewer` | Evaluates a diff for correctness/style/conventions | `agent` |
-| `security-reviewer` | Evaluates a diff specifically for security issues, by severity | `agent` |
-| `tester` | Interprets test suite output — diagnoses regressions vs. flaky failures | `agent`, backed by a `function` test-runner node |
-| `monitor` | Assesses post-deploy health signals, flags suspected regressions | `agent` |
+| [`planner`](../roles/planner.yaml) | Turns a ticket/spec into an actionable plan | `agent` |
+| [`coder`](../roles/coder.yaml) | Produces or revises a code diff | `agent` (+ Cursor Automation tool) |
+| [`reviewer`](../roles/reviewer.yaml) | Evaluates a diff for correctness/style/conventions | `agent` |
+| [`security-reviewer`](../roles/security-reviewer.yaml) | Evaluates a diff specifically for security issues, by severity | `agent` |
+| [`tester`](../roles/tester.yaml) | Interprets test suite output — diagnoses regressions vs. flaky failures | `agent`, backed by a `function` test-runner node |
+| [`monitor`](../roles/monitor.yaml) | Assesses post-deploy health signals, flags suspected regressions | `agent` |
 | `release-notes-writer` | Summarizes merged changes | `agent` |
-| `deployer` | Executes or requests approval for deployment steps | mix of `function` + `human` |
+| [`deployer`](../roles/deployer.yaml) | Executes or requests approval for deployment steps | mix of `function` + `human` |
 
-`reviewer` and `security-reviewer` are deliberately separate roles, not one role with two concerns — this keeps each role's system prompt focused and lets a workflow spec require both independently (a diff can be style-approved but security-blocked, or vice versa).
+`reviewer` and `security-reviewer` are deliberately separate roles, not one role with two concerns — this keeps each role's system prompt focused and lets a workflow spec require both independently (a diff can be style-approved but security-blocked, or vice versa). `release-notes-writer` has no role file yet — not created.
 
 ### 7.3 Prompt Versioning Rule
 

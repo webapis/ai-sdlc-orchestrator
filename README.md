@@ -22,9 +22,9 @@ manual before writing code.
 - **Failures are handled by category, not by panic.** Rate limits,
   invalid input, and policy violations are each handled differently — no
   infinite retry loops, no silent failures on things that needed a human.
-- **Change one piece without breaking the rest.** Prompts (`roles/`),
-  workflow shape (`workflows/`), and routing logic (Python) are separate
-  layers — edit one without risking the others.
+- **Change one piece without breaking the rest.** Prompts ([`roles/`](roles/)),
+  workflow shape ([`workflows/`](workflows/)), and routing logic (Python) are
+  separate layers — edit one without risking the others.
 - **Scales down as well as up.** A single developer using Claude Code
   subagents is already doing this pattern at a small scale. This project
   is what it looks like when that needs to run unattended, across many
@@ -57,6 +57,9 @@ Read the full stories in [`docs/use-cases.md`](docs/use-cases.md).
    means. Check current phase and open items before starting work.
 5. Read [`docs/operations.md`](docs/operations.md) — the full inventory
    of operations the system performs, grouped by where each happens.
+6. Read [`docs/sdlc-roster.md`](docs/sdlc-roster.md) — the full SDLC
+   position roster this project simulates as autonomous AI roles, and
+   what's deliberately kept human-only.
 
 ## Repository layout
 
@@ -75,6 +78,9 @@ ai-sdlc-orchestrator/
 └── deploy/
     └── k8s/                Kubernetes manifests
 ```
+
+Key folders: [`docs/`](docs/) · [`roles/`](roles/) · [`workflows/`](workflows/) ·
+[`contracts/`](contracts/) · [`architecture/`](architecture/) · [`src/`](src/)
 
 ## Local development
 
