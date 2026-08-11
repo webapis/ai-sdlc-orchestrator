@@ -49,7 +49,10 @@ See `architecture.md` §12 for the corresponding API endpoints.
 
 - **Planner** — read the ticket/spec, produce an implementation plan
 - **Coder** — read code, write/edit a diff, open a branch
-- **Reviewer** — read a diff, produce structured approve/reject + feedback
+- **Reviewer** — read a diff, produce structured approve/reject + feedback (correctness/style)
+- **Security reviewer** — read a diff, flag security findings by severity, block on critical/high
+- **Tester** — read test suite output, diagnose regression vs. flaky failure
+- **Monitor** — read post-deploy metrics/logs, assess health, flag suspected regressions
 - **Deployer** — summarize a merged change, assess risk level for approval
 
 See `architecture.md` §7.2 for the full role set and `/roles/*.yaml` in the repo for current definitions.
@@ -116,3 +119,4 @@ Both are open design work, not yet scheduled into a phase.
 | Date | Change |
 |---|---|
 | 2026-08-08 | Initial operations inventory |
+| 2026-08-10 | Added security-reviewer, tester, monitor as autonomous agent roles (were previously human-only gaps) |

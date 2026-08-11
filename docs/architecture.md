@@ -115,9 +115,7 @@ Orchestration Engine
 ├── RetryPolicyEngine    — classifies failures and applies retry/escalation rules
 └── ExecutionTracer      — emits structured events for observability
 ```
-## 2.4 Internal Process Diagram
 
-![Orchestrator internal process](../architecture/orchestrator-internal-process.svg)
 ### 2.4 Request Flow (typical run)
 
 1. A trigger (webhook, manual API call, schedule) creates a **WorkflowRun** for a registered **Project**.
@@ -416,10 +414,14 @@ temperature: 0.2
 |---|---|---|
 | `planner` | Turns a ticket/spec into an actionable plan | `agent` |
 | `coder` | Produces or revises a code diff | `agent` (+ Cursor Automation tool) |
-| `reviewer` | Evaluates a diff for correctness/security/style | `agent` |
-| `tester` | (Optional agent wrapper) interprets test failures | `agent`, backed by a `function` test-runner node |
+| `reviewer` | Evaluates a diff for correctness/style/conventions | `agent` |
+| `security-reviewer` | Evaluates a diff specifically for security issues, by severity | `agent` |
+| `tester` | Interprets test suite output — diagnoses regressions vs. flaky failures | `agent`, backed by a `function` test-runner node |
+| `monitor` | Assesses post-deploy health signals, flags suspected regressions | `agent` |
 | `release-notes-writer` | Summarizes merged changes | `agent` |
 | `deployer` | Executes or requests approval for deployment steps | mix of `function` + `human` |
+
+`reviewer` and `security-reviewer` are deliberately separate roles, not one role with two concerns — this keeps each role's system prompt focused and lets a workflow spec require both independently (a diff can be style-approved but security-blocked, or vice versa).
 
 ### 7.3 Prompt Versioning Rule
 
